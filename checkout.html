@@ -1,0 +1,374 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>sunkissed com — checkout</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=AcXVrBMJRow03VVLxTl2d0OPDapv4PtizxelcC1gGmejPyihTcNBm6gAzfPaZ51c5JuSAzoGotXzrANE&currency=EUR&disable-funding=card"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      background: #f1f5f9;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      color: #334155;
+    }
+    .container {
+      display: flex;
+      max-width: 1000px;
+      width: 100%;
+      background: #fff;
+      margin: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .checkout {
+      flex: 1;
+      padding: 40px;
+    }
+    .sidebar {
+      width: 320px;
+      background: #f9fafb;
+      padding: 40px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid #e2e8f0;
+    }
+    .logo {
+      max-width: 140px;
+      margin-bottom: 24px;
+    }
+    .product-name {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .product-desc {
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .promo-section {
+      margin-top: 20px;
+      font-size: 15px;
+    }
+    .promo-section input {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+      background: #f9fafb;
+      box-sizing: border-box;
+    }
+    .promo-section button {
+      padding: 10px 16px;
+      background: #c2d6f6;
+      color: #ffffff;
+      border: 1px solid #c2d6f6;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 6px;
+      transition: all 0.2s ease;
+    }
+    .promo-section button:hover {
+      transform: translateY(-2px);
+      background: #eef2ff;
+    }
+    .promo-message {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .tip-section {
+      margin-top: 24px;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #c2d6f6;
+      box-shadow: 0 4px 15px rgba(67,56,202,0.15);
+      transition: transform 0.2s ease;
+    }
+    .tip-section:hover {
+      transform: translateY(-2px);
+    }
+    .tip-section label {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .tip-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tip-buttons button {
+      padding: 10px 16px;
+      background: #c2d6f6;
+      color: #ffffff;
+      border: 1px solid #c2d6f6;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    .tip-buttons button:hover {
+      background: #eef2ff;
+      transform: translateY(-2px);
+    }
+    .tip-buttons button.active {
+      background: #b2cbf2;
+      color: #fff;
+      border-color: #b2cbf2;
+    }
+    .total-price {
+      margin-top: 20px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin: 20px 0 8px;
+      font-size: 14px;
+    }
+    input:not(.promo-input) {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #f9fafb;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #4338ca;
+      background: #fff;
+    }
+    #paypal-button-container {
+      margin-bottom: 24px;
+    }
+    .divider {
+      text-align: center;
+      position: relative;
+      margin: 24px 0;
+      font-size: 14px;
+    }
+    .divider::before,
+    .divider::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #cbd5e1;
+    }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+    #card-element {
+      border: 1px solid #cbd5e1;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f9fafb;
+      margin-top: 8px;
+      margin-bottom: 24px;
+    }
+    #payment-message {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 15px;
+      display: none;
+    }
+    #payment-message.success {
+      color: #16a34a;
+      display: block;
+    }
+    #payment-message.error {
+      color: #dc2626;
+      display: block;
+    }
+    .pay-button {
+      width: 100%;
+      background: #c2d6f6;
+      color: #ffffff;
+      border: 1px solid #c2d6f6;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .pay-button:hover {
+      transform: translateY(-2px);
+      background: #eef2ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="checkout">
+      <h1>◟‿ ᥴһᥱᥴk᥆ᥙ𝗍</h1>
+
+      <div id="paypal-button-container"></div>
+      <div class="divider">or</div>
+
+      <label for="email">ᥱ—mᥲіᥣ</label>
+      <input type="email" id="email" placeholder="ᥡ᥆ᥙ@ᥱ᥊ᥲm⍴ᥣᥱ.ᥴ᥆m" />
+
+      <label for="name">𝖿ᥙᥣᥣ ᥣᥱgᥲᥣ ᥒᥲmᥱ</label>
+      <input type="text" id="name" placeholder="ᥡ᥆ᥙr 𝖿ᥙᥣᥣ ᥒᥲmᥱ" />
+
+      <label for="amount">ᥲm᥆ᥙᥒ𝗍</label>
+      <input type="number" id="amount" placeholder="ᥱ.g. 20" min="1" step="0.01" />
+
+      <label for="card-element">ᥴᥲrძ ძᥱ𝗍ᥲіᥣs</label>
+      <div id="card-element"></div>
+
+      <form id="payment-form">
+        <button type="submit" class="pay-button">ᥴ᥆m⍴ᥣᥱ𝗍ᥱ ᥆rძᥱr</button>
+        <div id="payment-message"></div>
+      </form>
+    </div>
+
+    <div class="sidebar">
+      <img src="https://i.imgur.com/OYvWQPX.png" alt="Logo" class="logo" />
+      <div class="product-name">/sᥙᥒkіssᥱძ ᥴ᥆ms</div>
+      <div class="product-desc">᥆rძᥱr 𝖿r᥆m mіᥣ𝗍᥆! ⍴ᥲᥡіᥒg ᥕі𝗍һ ᥱᥙr᥆? ⍴ᥲᥡ һᥱrᥱ!</div>
+
+      <div class="promo-section">
+        <label for="promo">⍴r᥆m᥆ ᥴ᥆ძᥱ</label>
+        <input type="text" id="promo" placeholder="Enter promo code" />
+        <button id="apply-promo">ᥲ⍴⍴ᥣᥡ</button>
+        <button id="remove-promo" style="display:none;">rᥱm᥆᥎ᥱ</button>
+        <div class="promo-message" id="promo-message"></div>
+      </div>
+
+      <div class="tip-section">
+        <label>𝗍і⍴ mᥱ ᥴ:</label>
+        <div class="tip-buttons">
+          <button class="tip-btn" data-amount="0">ᥒ᥆ 𝗍і⍴</button>
+          <button class="tip-btn" data-amount="2">+2 €</button>
+          <button class="tip-btn" data-amount="5">+5 €</button>
+          <button class="tip-btn" data-amount="10">+10 €</button>
+        </div>
+      </div>
+
+      <div class="total-price">𝗍᥆𝗍ᥲᥣ ᥆𝖿 ᥆rძᥱr: <span id="total-amount">0 €</span></div>
+    </div>
+  </div>
+
+  <script>
+    const stripe = Stripe("pk_live_51RdZW2AuHLqKAXDNm5WqoLwAHcN5EnNCdSVaa4dnlV50mO0KCzsBGryv7djhbufEYbnO1kTKOz6dYGvEOJdSTv0M00WC9gEKO5");
+    const elements = stripe.elements();
+    const cardElement = elements.create("card");
+    cardElement.mount("#card-element");
+
+    const amountInput = document.getElementById("amount");
+    const promoInput = document.getElementById("promo");
+    const promoMessage = document.getElementById("promo-message");
+    const totalAmount = document.getElementById("total-amount");
+    const tipButtons = document.querySelectorAll(".tip-btn");
+
+    let promoPercentage = 0;
+    let tipAmount = 0;
+
+    function updateTotal() {
+      const base = parseFloat(amountInput.value) || 0;
+      const discount = (base * promoPercentage) / 100;
+      const total = Math.max(0, base - discount + tipAmount);
+      totalAmount.textContent = `${total.toFixed(2)} €`;
+    }
+
+    tipButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        tipButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        tipAmount = parseFloat(btn.dataset.amount);
+        updateTotal();
+      });
+    });
+
+    amountInput.addEventListener("input", updateTotal);
+
+    document.getElementById("apply-promo").addEventListener("click", () => {
+      if (promoInput.value.trim().toUpperCase() === "SAVE10") {
+        promoPercentage = 10;
+        promoMessage.textContent = "⍴r᥆m᥆ ᥲ⍴⍴ᥣіᥱძ: -10%";
+        document.getElementById("remove-promo").style.display = "inline-block";
+        updateTotal();
+      } else {
+        promoMessage.textContent = "іᥒ᥎ᥲᥣіძ ᥴ᥆ძᥱ.";
+      }
+    });
+
+    document.getElementById("remove-promo").addEventListener("click", () => {
+      promoPercentage = 0;
+      promoInput.value = "";
+      promoMessage.textContent = "";
+      document.getElementById("remove-promo").style.display = "none";
+      updateTotal();
+    });
+
+    document.getElementById("payment-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const { error, paymentMethod } = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardElement,
+        billing_details: {
+          email: document.getElementById("email").value,
+          name: document.getElementById("name").value,
+        },
+      });
+      const message = document.getElementById("payment-message");
+      if (error) {
+        message.textContent = error.message;
+        message.className = "error";
+      } else {
+        message.textContent = "⍴ᥲᥡmᥱᥒ𝗍 mᥱ𝗍һ᥆ძ ᥴrᥱᥲ𝗍ᥱძ sᥙᥴᥴᥱss𝖿ᥙᥣᥣᥡ !";
+        message.className = "success";
+      }
+    });
+
+    // Initialize PayPal
+    paypal.Buttons({
+      createOrder: function(data, actions) {
+        const base = parseFloat(amountInput.value) || 0;
+        const discount = (base * promoPercentage) / 100;
+        const total = Math.max(0, base - discount + tipAmount);
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: total.toFixed(2)
+            }
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          alert('𝗍rᥲᥒsᥲᥴ𝗍і᥆ᥒ ᥴ᥆m⍴ᥣᥱ𝗍ᥱძ ᑲᥡ ' + details.payer.name.given_name);
+        });
+      },
+      onError: function(err) {
+        console.error(err);
+        alert('ᥲᥒ ᥱrr᥆r ᥆ᥴᥴᥙrrᥱძ ᥕі𝗍һ ⍴ᥲᥡ⍴ᥲᥣ : ' + err);
+      }
+    }).render('#paypal-button-container');
+
+    // Initialize total
+    tipButtons[0].classList.add("active");
+    updateTotal();
+  </script>
+</body>
+</html>

@@ -265,148 +265,109 @@ input[type="number"] {
     </div>
   </div>
 
-  <script>
-const stripe = Stripe("pk_live_51RdZW2AuHLqKAXDNm5WqoLwAHcN5EnNCdSVaa4dnlV50mO0KCzsBGryv7djhbufEYbnO1kTKOz6dYGvEOJdSTv0M00WC9gEKO5");
+<script>
+const stripe = Stripe('pk_live_...');
 const elements = stripe.elements();
-const cardElement = elements.create("card");
-cardElement.mount("#card-element");
+const card = elements.create('card');
+card.mount('#card-element');
 
-const amountInput = document.getElementById("amount");
-const promoInput = document.getElementById("promo");
-const promoMessage = document.getElementById("promo-message");
-const totalAmount = document.getElementById("total-amount");
-const tipButtons = document.querySelectorAll(".tip-btn");
-const payButton = document.querySelector('.pay-button');
+const amountInput = document.getElementById('amount');
+const payButton = document.getElementById('pay-button');
 const paymentMessage = document.getElementById('payment-message');
 
-let promoPercentage = 0;
-let tipAmount = 0;
-
-function calculateTotal() {
-  let amount = parseFloat(amountInput.value) || 0;
-  let discount = amount * (promoPercentage / 100);
-  let total = amount - discount + tipAmount;
-  return total > 0 ? total.toFixed(2) : "0.00";
-}
-
-function updateTotalDisplay() {
-  totalAmount.textContent = calculateTotal() + " €";
-}
-
-document.getElementById("apply-promo").addEventListener("click", () => {
-  const code = promoInput.value.trim().toLowerCase();
-  if (code === "sunkissed") {
-    promoPercentage = 15;
-    promoMessage.textContent = "Promo code applied! 15% discount.";
-    promoMessage.style.color = "green";
-    document.getElementById("apply-promo").style.display = "none";
-    document.getElementById("remove-promo").style.display = "inline-block";
-  } else {
-    promoMessage.textContent = "Invalid promo code.";
-    promoMessage.style.color = "red";
-  }
-  updateTotalDisplay();
-});
-
-document.getElementById("remove-promo").addEventListener("click", () => {
-  promoPercentage = 0;
-  promoInput.value = "";
-  promoMessage.textContent = "";
-  document.getElementById("apply-promo").style.display = "inline-block";
-  document.getElementById("remove-promo").style.display = "none";
-  updateTotalDisplay();
-});
-
-tipButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    tipButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    tipAmount = parseFloat(btn.getAttribute("data-amount")) || 0;
-    updateTotalDisplay();
-  });
-});
-
-amountInput.addEventListener("input", updateTotalDisplay);
-updateTotalDisplay();
-payButton.disabled = true;
-
-// Card input validation
-cardElement.on('change', (event) => {
-  if (event.complete) {
-    payButton.disabled = false;
-    paymentMessage.style.display = 'none';
-    paymentMessage.textContent = '';
-    paymentMessage.className = '';
-  } else if (event.error) {
-    payButton.disabled = true;
-    paymentMessage.style.display = 'block';
-    paymentMessage.textContent = event.error.message;
+// Enable button when card complete
+card.on('change', e => {
+  payButton.disabled = !e.complete;
+  if (e.error) {
+    paymentMessage.textContent = e.error.message;
     paymentMessage.className = 'error';
   } else {
-    payButton.disabled = true;
-    paymentMessage.style.display = 'none';
     paymentMessage.textContent = '';
-    paymentMessage.className = '';
   }
 });
 
-// PayPal button
-paypal.Buttons({
-  style: {
-    layout: 'vertical',
-    color: 'gold',
-    shape: 'rect',
-    label: 'paypal',
-    height: 40,
-  },
-  createOrder: function (data, actions) {
-    const total = calculateTotal();
-    return actions.order.create({
-      purchase_units: [{
-        amount: {
-          currency_code: 'EUR',
-          value: total
-        }
-      }]
-    });
-  },
-  onApprove: function (data, actions) {
-    return actions.order.capture().then(function (details) {
-      alert('Transaction completed by ' + details.payer.name.given_name);
-    });
-  }
-}).render('#paypal-button-container');
-
-// Stripe form submission
-document.getElementById("payment-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
+// Pay button click
+payButton.addEventListener('click', async () => {
   payButton.disabled = true;
-  paymentMessage.style.display = 'none';
-  paymentMessage.textContent = '';
-
-  const { error, paymentMethod } = await stripe.createPaymentMethod({
+  const {error, paymentMethod} = await stripe.createPaymentMethod({
     type: 'card',
-    card: cardElement,
+    card: card,
     billing_details: {
       name: document.getElementById('name').value,
-      email: document.getElementById('email').value,
-    },
+      email: document.getElementById('email').value
+    }
   });
-
   if (error) {
-    paymentMessage.style.display = 'block';
     paymentMessage.textContent = error.message;
     paymentMessage.className = 'error';
     payButton.disabled = false;
   } else {
-    // Here you'd call your backend to create a PaymentIntent and confirm payment
-    paymentMessage.style.display = 'block';
     paymentMessage.textContent = 'Payment method created successfully.';
     paymentMessage.className = 'success';
     payButton.disabled = false;
   }
 });
-  </script>
+
+// Payment Request Button
+const paymentRequest = stripe.paymentRequest({
+  country: 'FR',
+  currency: 'eur',
+  total: {
+    label: 'Total',
+    amount: 0 // start with 0
+  },
+  requestPayerName: true,
+  requestPayerEmail: true
+});
+
+// Update amount dynamically
+amountInput.addEventListener('input', () => {
+  const amt = Math.round((parseFloat(amountInput.value || 0)) * 100);
+  paymentRequest.update({
+    total: {
+      label: 'Total',
+      amount: amt
+    }
+  });
+});
+
+// Payment method event
+paymentRequest.on('paymentmethod', async (ev) => {
+  ev.complete('success');
+  paymentMessage.textContent = 'Payment received via Apple/Google Pay!';
+  paymentMessage.className = 'success';
+});
+
+// Check availability and mount
+paymentRequest.canMakePayment().then(result => {
+  if (result) {
+    const prButton = elements.create('paymentRequestButton', {paymentRequest});
+    prButton.mount('#stripe-payment-request-button');
+  } else {
+    document.getElementById('stripe-payment-request-button').style.display = 'none';
+  }
+});
+
+// PayPal Button
+paypal.Buttons({
+  style: {shape:'rect',color:'gold',layout:'vertical',label:'paypal'},
+  createOrder: (data, actions) => {
+    return actions.order.create({
+      purchase_units: [{
+        amount: {
+          currency_code: 'EUR',
+          value: (parseFloat(amountInput.value) || 0).toFixed(2)
+        }
+      }]
+    });
+  },
+  onApprove: (data, actions) => {
+    return actions.order.capture().then(details => {
+      alert('Transaction completed by ' + details.payer.name.given_name);
+    });
+  }
+}).render('#paypal-button-container');
+
+</script>
 </body>
 </html>

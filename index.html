@@ -208,6 +208,17 @@ input[type="number"] {
   font-size: 14px;
   box-sizing: border-box;
 }
+    @media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #e2e8f0;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -219,6 +230,12 @@ input[type="number"] {
         <div id="paypal-button-container"></div>
         <div id="stripe-payment-request-button"></div>
       </div>
+      
+      <div style="display: flex; align-items: center; text-align: center; margin: 16px 0; color: #475569; font-size: 13px;">
+  <hr style="flex:1; border:none; border-top:1px solid #cbd5e1; margin:0;">
+  <span style="padding:0 8px;">or</span>
+  <hr style="flex:1; border:none; border-top:1px solid #cbd5e1; margin:0;">
+</div>
 
       <label for="email">ᥱ—mᥲіᥣ</label>
       <input type="email" id="email" placeholder="ᥡ᥆ᥙ@ᥱ᥊ᥲm⍴ᥣᥱ.ᥴ᥆m" />
@@ -366,7 +383,7 @@ input[type="number"] {
         color: 'gold',
         shape: 'rect',
         label: 'paypal',
-        height: 41,
+        height: 40,
       },
       createOrder: function (data, actions) {
         const total = calculateTotal();
@@ -387,16 +404,15 @@ input[type="number"] {
     }).render('#paypal-button-container');
 
     // Stripe Payment Request Button
-    const paymentRequest = stripe.paymentRequest({
-      country: 'DE',
-      currency: 'eur',
-      total: {
-        label: 'Total',
-        amount: Math.round(calculateTotal() * 100),
-      },
-      requestPayerName: true,
-      requestPayerEmail: true,
-    });
+const paymentRequest = stripe.paymentRequest({
+  currency: 'eur',
+  total: {
+    label: 'Total',
+    amount: Math.round(calculateTotal() * 100),
+  },
+  requestPayerName: true,
+  requestPayerEmail: true,
+});
 
     paymentRequest.on('paymentmethod', async (ev) => {
       const { paymentMethod, error } = await stripe.createPaymentMethod({

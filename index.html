@@ -2,218 +2,217 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>sunkissed coms — checkout</title>
+  <title>sunkissed com — checkout</title>
   <script src="https://js.stripe.com/v3/"></script>
   <script src="https://www.paypal.com/sdk/js?client-id=AcXVrBMJRow03VVLxTl2d0OPDapv4PtizxelcC1gGmejPyihTcNBm6gAzfPaZ51c5JuSAzoGotXzrANE&currency=EUR&disable-funding=card"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: "Inter", sans-serif;
-      background: #f1f5f9;
-      display: flex;
-      justify-content: center;
-      min-height: 60vh;
-      color: #334155;
-    }
-    .container {
-      display: flex;
-      max-width: 800px;
-      width: 80%;
-      background: #fff;
-      margin: 40px;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-      overflow: hidden;
-    }
-    .checkout {
-      flex: 1;
-      padding: 40px;
-    }
-    .sidebar {
-      width: 320px;
-      background: #f9fafb;
-      padding: 40px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      border-left: 1px solid #e2e8f0;
-    }
-    .logo {
-      max-width: 140px;
-      margin-bottom: 24px;
-    }
-    .product-name {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-    .product-desc {
-      font-size: 14px;
-      margin-bottom: 24px;
-    }
-    .promo-section {
-      margin-top: 20px;
-      font-size: 15px;
-    }
-    .promo-section input {
-      width: 100%;
-      padding: 10px;
-      font-size: 15px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      margin-top: 8px;
-      margin-bottom: 8px;
-      background: #f9fafb;
-      box-sizing: border-box;
-    }
-    .promo-section button {
-      padding: 10px 16px;
-      background: #c2d6f6;
-      color: #ffffff;
-      border: 1px solid #c2d6f6;
-      font-size: 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-right: 6px;
-      transition: all 0.2s ease;
-    }
-    .promo-section button:hover {
-      transform: translateY(-2px);
-      background: #eef2ff;
-    }
-    .promo-message {
-      margin-top: 8px;
-      font-size: 14px;
-    }
-    .tip-section {
-      margin-top: 24px;
-      padding: 20px;
-      background: #ffffff;
-      border-radius: 12px;
-      border: 1px solid #c2d6f6;
-      box-shadow: 0 4px 15px rgba(67,56,202,0.15);
-      transition: transform 0.2s ease;
-    }
-    .tip-section:hover {
-      transform: translateY(-2px);
-    }
-    .tip-section label {
-      font-weight: 700;
-      font-size: 15px;
-      margin-bottom: 12px;
-      display: block;
-    }
-    .tip-buttons {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .tip-buttons button {
-      padding: 10px 16px;
-      background: #c2d6f6;
-      color: #ffffff;
-      border: 1px solid #c2d6f6;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s ease;
-    }
-    .tip-buttons button:hover {
-      background: #eef2ff;
-      transform: translateY(-2px);
-    }
-    .tip-buttons button.active {
-      background: #b2cbf2;
-      color: #fff;
-      border-color: #b2cbf2;
-    }
-    .total-price {
-      margin-top: 20px;
-      font-size: 16px;
-      font-weight: 600;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    label {
-      display: block;
-      font-weight: 600;
-      margin: 20px 0 8px;
-      font-size: 14px;
-    }
-    input:not(.promo-input) {
-      width: 100%;
-      padding: 12px;
-      font-size: 15px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      background: #f9fafb;
-      box-sizing: border-box;
-    }
-    input:focus {
-      outline: none;
-      border-color: #4338ca;
-      background: #fff;
-    }
-    #paypal-button-container {
-      margin-bottom: 24px;
-    }
-    .divider {
-      text-align: center;
-      position: relative;
-      margin: 24px 0;
-      font-size: 14px;
-    }
-    .divider::before,
-    .divider::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      width: 40%;
-      height: 1px;
-      background: #cbd5e1;
-    }
-    .divider::before { left: 0; }
-    .divider::after { right: 0; }
-    #card-element {
-      border: 1px solid #cbd5e1;
-      padding: 12px;
-      border-radius: 8px;
-      background: #f9fafb;
-      margin-top: 8px;
-      margin-bottom: 24px;
-    }
-    #payment-message {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 15px;
-      display: none;
-    }
-    #payment-message.success {
-      color: #16a34a;
-      display: block;
-    }
-    #payment-message.error {
-      color: #dc2626;
-      display: block;
-    }
-    .pay-button {
-      width: 100%;
-      background: #c2d6f6;
-      color: #ffffff;
-      border: 1px solid #c2d6f6;
-      padding: 14px;
-      font-size: 16px;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .pay-button:hover {
-      transform: translateY(-2px);
-      background: #eef2ff;
-    }
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: #f1f5f9;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  color: #334155;
+}
+.container {
+  display: flex;
+  max-width: 800px;
+  width: 95%;
+  background: #fff;
+  margin: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  overflow: hidden;
+  flex-wrap: wrap;
+}
+.checkout {
+  flex: 1;
+  padding: 24px;
+}
+.sidebar {
+  width: 320px;
+  background: #f9fafb;
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #e2e8f0;
+}
+.logo {
+  max-width: 120px;
+  margin-bottom: 16px;
+}
+.product-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.product-desc {
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.promo-section {
+  margin-top: 16px;
+  font-size: 14px;
+}
+.promo-section input {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  background: #f9fafb;
+}
+.promo-section button {
+  padding: 8px 12px;
+  background: #c2d6f6;
+  color: #ffffff;
+  border: 1px solid #c2d6f6;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 4px;
+  transition: all 0.2s ease;
+}
+.promo-section button:hover {
+  transform: translateY(-2px);
+  background: #eef2ff;
+}
+.promo-message {
+  margin-top: 6px;
+  font-size: 13px;
+}
+.tip-section {
+  margin-top: 16px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #c2d6f6;
+  box-shadow: 0 2px 8px rgba(67,56,202,0.1);
+  transition: transform 0.2s ease;
+}
+.tip-section:hover {
+  transform: translateY(-2px);
+}
+.tip-section label {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 8px;
+  display: block;
+}
+.tip-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tip-buttons button {
+  padding: 8px 12px;
+  background: #c2d6f6;
+  color: #ffffff;
+  border: 1px solid #c2d6f6;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+.tip-buttons button:hover {
+  background: #eef2ff;
+  transform: translateY(-2px);
+}
+.tip-buttons button.active {
+  background: #b2cbf2;
+  color: #fff;
+  border-color: #b2cbf2;
+}
+.total-price {
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+label {
+  display: block;
+  font-weight: 600;
+  margin: 16px 0 6px;
+  font-size: 13px;
+}
+input:not(.promo-input) {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f9fafb;
+}
+input:focus {
+  outline: none;
+  border-color: #4338ca;
+  background: #fff;
+}
+#paypal-button-container {
+  margin-bottom: 16px;
+}
+.divider {
+  text-align: center;
+  position: relative;
+  margin: 16px 0;
+  font-size: 13px;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: #cbd5e1;
+}
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+#card-element {
+  border: 1px solid #cbd5e1;
+  padding: 10px;
+  border-radius: 6px;
+  background: #f9fafb;
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+#payment-message {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 14px;
+  display: none;
+}
+#payment-message.success {
+  color: #16a34a;
+  display: block;
+}
+#payment-message.error {
+  color: #dc2626;
+  display: block;
+}
+.pay-button {
+  width: 100%;
+  background: #c2d6f6;
+  color: #ffffff;
+  border: 1px solid #c2d6f6;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.pay-button:hover {
+  transform: translateY(-2px);
+  background: #eef2ff;
+}
   </style>
 </head>
 <body>
